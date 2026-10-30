@@ -1,0 +1,18 @@
+import type { Analysis } from "./session";
+// Fixed sample data, never a fallback for a live API failure.
+export const DEMO_STEPS: Analysis[] = [
+  { transcript: "Travel time is often considered a cost that should be minimized. However, the experience of traveling can itself have value. People may enjoy the scenery or spend time with their companions.", title: "移動時間は、本当に短いほうがいい？", currentSection: "background", sections: [
+    { id: "background", summary: "移動時間は短いほどよいと思われがちですが、景色や会話など、移動そのものに価値がある場合もあります。", detail: "これまで、移動にかかる時間は減らすべき負担として扱われがちでした。しかし、移動中には景色を眺めたり、同行者と会話したりできます。移動には単なる場所の移り変わり以上の意味があるのではないか、というのが出発点です。", evidence: ["the experience of traveling can itself have value"] },
+    { id: "summary", summary: "移動時間を単なる負担として扱う見方を見直し、移動中の体験に注目している発表です。", detail: "発表は背景の説明に入っています。具体的な調査方法や結果は、まだ話されていません。", evidence: [] }
+  ], questions: ["移動そのものの価値には、どんな種類があるのでしょうか？"], terms: [{ term: "Travel time", meaning: "目的地に到着するまでの移動時間のこと。" }] },
+  { transcript: "Our objective is to understand when people want to reduce their travel time. We asked participants to recall all their trips from the previous day, and indicate which trips they would shorten if they could.", title: "移動時間は、本当に短いほうがいい？", currentSection: "methods", sections: [
+    { id: "objective", summary: "人が「どんな移動の時間を短くしたいか」を調べ、移動の捉え方を明らかにします。", detail: "単に移動を短縮する方法を探すのではなく、人が時間を短くしたいと思う条件を調べます。移動の状況と本人の希望を照らし合わせることで、移動中の体験の価値を捉えようとしています。", evidence: ["understand when people want to reduce their travel time"] },
+    { id: "methods", summary: "参加者に前日の移動を振り返ってもらい、短くできるならどの移動を短くしたいかを尋ねます。", detail: "参加者は、前日に行った移動を思い出して回答します。それぞれの移動について、可能なら時間を短縮したいかを尋ねます。実際の行動に沿った回答を集める調査です。参加者数や詳しい条件は、この段階では説明されていません。", evidence: ["recall all their trips from the previous day"] },
+    { id: "summary", summary: "移動時間に価値がある可能性に注目し、前日の移動を振り返る調査で「短くしたい移動」の条件を調べます。", detail: "背景から目的、調査方法までが説明されました。調査結果はまだ話されていません。", evidence: [] }
+  ], questions: ["前日を振り返るときの記憶の偏りには、どう対応しましたか？", "移動の長さと満足度は、分けて分析していますか？"], terms: [{ term: "Travel time", meaning: "目的地に到着するまでの移動時間のこと。" }, { term: "Recall", meaning: "過去の経験を思い出して答えること。この発表では前日の移動を振り返ります。" }] },
+  { transcript: "We analyzed the relationship between the desire to shorten travel and factors such as transport mode, companionship, and working during travel. The results suggest that having adult companions is associated with a greater willingness to accept travel time. Travel time is not simply something to minimize.", title: "移動時間は、本当に短いほうがいい？", currentSection: "results", sections: [
+    { id: "experiments", summary: "移動手段や同行者の有無、移動中に仕事をするかなどと、時間を短くしたい気持ちの関係を分析します。", detail: "調査で集めた移動の記録を、移動手段や過ごし方によって比較します。それぞれの条件と「この移動を短くしたい」という希望の関連を分析します。このデモの音声では、具体的な人数や統計の数値は示されていません。", evidence: ["transport mode, companionship, and working during travel"] },
+    { id: "results", summary: "大人の同行者がいることは、移動時間を受け入れやすいことと関係していました。短いほどよいとは限りません。", detail: "移動時間に対する感じ方は、その状況によって変わることが示唆されました。特に大人の同行者がいる場合、時間を受け入れやすいという関連が見られました。ただし、これは関連についての説明であり、同行者が原因だと証明したわけではありません。", evidence: ["having adult companions is associated with a greater willingness to accept travel time"] },
+    { id: "summary", summary: "移動は、ただ短ければいいわけではありません。誰と、どう過ごすかによって、移動時間の感じ方が変わることを示した研究です。", detail: "前日の移動を振り返る調査を使い、人がどんな移動の時間を短くしたいかを分析しています。大人の同行者がいることと移動時間を受け入れる気持ちに関連が見られました。移動の評価には所要時間だけでなく、そこで過ごす体験も考える必要がありそうです。", evidence: ["Travel time is not simply something to minimize."] }
+  ], questions: ["同行者の効果は、移動手段や所要時間を考慮しても同じですか？", "この結果を、公共交通の設計にどう活かせると考えていますか？", "一人でも移動を楽しめる条件は調べていますか？"], terms: [{ term: "Companionship", meaning: "誰かと一緒にいること。この研究では同行者がいるかどうかを指します。" }, { term: "Associated with", meaning: "あることと別のことに関連が見られるという意味。一方が他方の原因であるとまでは言っていません。" }] }
+];
