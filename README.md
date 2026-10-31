@@ -31,6 +31,44 @@ npm.cmd run dev
 - 一覧に載ることと、音声の理解・文章の要約に使えることは別です。音声出力・画像生成・埋め込み・Realtime専用など、対象APIに対応しないモデルは使用できません。ChatGPTのチャット契約とAPIの利用権限は別です。
 - 設定画面は「使うAI」「APIキー」「要約モデル」の3項目です。APIキーのラベルは共通とし、入力例と取得リンクは選択中のAIに合わせて切り替わります。設定画面の×ボタンは廃止し、「閉じる」またはEscで戻ります。
 
+## 自分のCloudflareアカウントへ公開する
+
+Cloudflareのダッシュボードで「Create app」からGitHubを接続し、`manyoukazu/youyakuzemi` を選択します。既存リポジトリをインポートする項目を使います。
+
+| 設定項目 | 値 |
+| --- | --- |
+| Worker名／プロジェクト名 | `youyakuzemi` |
+| 本番ブランチ | `main` |
+| ルートディレクトリ | リポジトリ直下（空欄または `/`） |
+| Build command | `npm run build:cloudflare` |
+| Deploy command | `npm run deploy` |
+| Preview／非本番ブランチ用コマンド（表示された場合） | `npm run deploy:preview` |
+
+Worker名は `wrangler.jsonc` の `name` と一致させます。別の名前にしたい場合は、ダッシュボードと設定ファイルを両方変更してください。独自ドメインは後から設定できます。最初は発行される `workers.dev` のURLを使います。
+
+Gemini／OpenAIのキーは公開後もアプリの「AIの接続設定」で入力します。このアプリではCloudflareのビルド環境変数にAIのAPIキーを登録する必要はありません。既存のSites公開先とは別の公開先になります。
+
+公開後も `npm.cmd run dev` でローカル開発を続けられます。変更をテストして `main` にpushすると、Git連携を設定したCloudflare側で更新版がビルド・公開されます。プレビューを有効にした開発用ブランチでは、プレビューURLで確認してからmainへ取り込めます。
+
+手動で公開する場合は、ターミナルでCloudflareへログインしてから実行します。
+
+```powershell
+npx.cmd wrangler login
+npm.cmd run build:cloudflare
+npm.cmd run deploy
+```
+
+公開せずにパッケージを検証する場合は、次を実行します。
+
+```powershell
+npm.cmd run build:cloudflare
+npm.cmd run deploy -- --dry-run --outdir outputs/cloudflare-check
+```
+
+`npm run build` はこれまでのSites向け、`npm run build:cloudflare` は自分のCloudflare向けです。Cloudflare向けは `worker/cloudflare.ts` を使い、Sites専用の認証モックやコネクターを含めません。既存のSites設定とソースは保持しています。
+
+設定の根拠：[CloudflareのGit連携](https://developers.cloudflare.com/workers/ci-cd/builds/)、[ビルド・デプロイ設定](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/)。
+
 ## データと制約
 
 - APIキーはページのメモリ内だけに保持し、localStorage・ノート・ソース・URL・ログに書きません。再読込時は再入力が必要です。
@@ -44,7 +82,7 @@ npm.cmd run dev
 
 ## 実装と検証
 
-React 19・TypeScript・Vinext・Cloudflare Workersで構成しています。Sitesの非公開ホスティングを利用し、元のCloudflareモックのURLは変更していません。
+React 19・TypeScript・Vinext・Cloudflare Workersで構成しています。Sitesの非公開ホスティングと、自分のCloudflare Workersアカウントへ公開する構成を用意しています。元のCloudflareモックのURLは変更していません。
 
 | ファイル | 役割 |
 | --- | --- |
