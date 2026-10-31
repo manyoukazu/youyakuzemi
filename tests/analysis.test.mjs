@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { analyzeAudio, validateInput, normalizeAnalysis } from "../lib/analysis.mjs";
 
-const input = { audio: "UklGR" + "A".repeat(100), language: "en", model: "gemini-3.8-flash", previous: { sections: [] } };
+const input = { audio: "UklGR" + "A".repeat(103), language: "en", model: "gemini-3.8-flash", previous: { sections: [] } };
 const result = { transcript: "Our purpose is to study travel.", title: "移動の研究", currentSection: "objective", sections: [{ id: "objective", summary: "移動について調べます。", detail: "発表の目的を説明しています。", evidence: ["Our purpose"] }], questions: ["どの移動を対象にしていますか？"], terms: [] };
 test("request only forwards bounded context and rejects unsupported data", () => {
   assert.throws(() => validateInput({ ...input, model: "../../bad" }));

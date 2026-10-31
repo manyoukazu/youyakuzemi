@@ -16,23 +16,32 @@ npm.cmd run dev
 ## 使い方
 
 1. 「デモを体験」で、APIキーなしで要約カードの更新を確認できます。デモは固定サンプルであり、マイクやAIを使用しません。
-2. 「AI 接続を設定」で、[Google AI Studio](https://aistudio.google.com/apikey)のGemini APIキーを入力します。APIの利用条件・料金が適用されます。既定モデルは `gemini-3.8-flash`、代替は `gemini-3.5-flash-lite` です。
+2. 「AIの接続設定」でGemini・OpenAI（ChatGPT）・Anthropic（Claude）を選び、各社のAPIキーを入力します。「一覧を取得」でAPIが返す全モデルをページ末尾まで取得し、選択できます。モデルIDの直接入力も可能です。画像生成など、要約に対応しないモデルは利用できません。APIの利用権限・料金が適用されます。
 3. 会場では「マイク」、オンラインでは「タブの音声」を選択します。タブの共有時は「タブの音声も共有」をオンにしてください。
 4. 「収音を開始」を押すと、15／20／30秒分の音声がたまるたびに、文字起こしと要約が更新されます。更新には音声の収集時間に加えてAPI処理時間がかかります。
 5. 背景・目的・関連研究・手法・実験・結論に自動分類し、ここまでの全体要約を更新します。カードから詳細説明と元の言語の表現を確認できます。まだ話されていない項目は埋めません。
 6. 一時停止・再開・終了ができます。終了時にも最後の短い音声を処理します。APIエラーでは自動で一時停止し、同じ音声を保持して「再試行」できます。
 7. ノートはこのブラウザに最大12件保存されます。Markdown／テキスト／JSONで書き出せます。質問のヒント、用語の説明、自分のメモも保存・書き出しに含まれます。
 
+## AIサービスとモデルの選択
+
+- Gemini：選んだモデルで音声を直接要約できます。音声を受け取れないモデルでは、文字起こしを別のGemini／OpenAIモデルに任せる設定も可能です。
+- OpenAI（ChatGPT）：OpenAIの文字起こしモデルで音声を文字にし、選択したモデルで要約します。同じOpenAI APIキーを再利用できます。モデルに合わせてResponses API／Chat Completions APIを選べます。
+- Anthropic（Claude）：GeminiまたはOpenAIで文字起こしし、Claudeには文字起こしを渡して要約します。ClaudeのAPIキーに加え、文字起こし用のAPIキーが必要です。
+- モデル一覧は固定の2モデルに制限せず、各サービスのModels APIが返す全件を表示します。取得に失敗した場合は一部だけを完全な一覧として表示しません。取得後でも任意のモデルIDを入力できます。
+- 一覧に載ることと、音声の理解・文章の要約に使えることは別です。音声出力・画像生成・埋め込み・Realtime専用など、対象APIに対応しないモデルは使用できません。ChatGPT／Claudeのチャット契約とAPIの利用権限は別です。
+- APIキーは設定画面の「設定を保存」でページのメモリ内に保持します。更新・再読込すると消えます。設定画面の×ボタンは廃止し、「閉じる」またはEscで戻ります。
+
 ## データと制約
 
 - APIキーはページのメモリ内だけに保持し、localStorage・ノート・ソース・URL・ログに書きません。再読込時は再入力が必要です。
-- 音声は独立した16kHz・モノラルPCM WAVとしてサーバー経由でGoogle Geminiへ送信します。アプリのサーバーには保存しません。Google側の取扱いは利用するAPI契約に従います。
+- 音声は独立した16kHz・モノラルPCM WAVとして、選択した音声処理サービスへサーバー経由で送信します。別のサービスで要約する場合は、文字起こしだけを要約サービスへ送信します。キーは用途別のリクエストヘッダーで送り、URLやプロンプトには含めません。アプリのサーバーには保存しません。各社での取扱いは利用するAPI契約に従います。
 - 原音声はブラウザの処理待ちキューにだけ保持します。再読込・ページを閉じる操作では未処理音声が失われます。収音中／未処理音声がある場合、離脱確認を表示します。
 - キューが8件以上になると収音を一時停止します。既存ノートを切り替える操作は、収音と要約が終わるまで制限します。
 - ブラウザのデータ削除でノートも削除されます。大切な記録は書き出してください。端末間の同期はありません。
 - セクションの分類、文字起こし、要約はAIによる推定です。精度は音質、発表内容、APIモデルによって変わります。話者の分離やスライド解析は行いません。
 - タブ音声の共有可否はOS・ブラウザ・共有対象に依存します。デスクトップ版Chrome / Edgeを想定しています。モバイルではマイク収音を使用してください。
-- 実際のGemini APIへの接続・認識精度は、利用者の有効なAPIキーでの確認が必要です。
+- 実際の各社APIへの接続・認識精度は、利用者の有効なAPIキーでの確認が必要です。
 
 ## 実装と検証
 
@@ -54,13 +63,15 @@ npm.cmd run typecheck
 npm.cmd run build
 ```
 
-APIテストはGoogleへの送信内容、入力制限、異常応答、API上限エラーを検証します。実装時には既存Chromeで、デモ、詳細表示、メモ保存、再読込、書き出し、履歴、390px幅での表示と、合成音声による実際のAudioWorklet収音を確認しました。AI応答をテスト用に差し替え、一時停止時の残り音声、失敗した音声の同一データでの再試行、再開、終了時の処理、秘密情報を保存しないことを検証しています。
+APIテストは各社への送信内容、モデル一覧のページ送り、文字起こしと要約の分離、用途ごとのキーの分離、入力制限、異常応答、API上限エラーを検証します。実装時には既存Chromeで、デモ、詳細表示、メモ保存、再読込、書き出し、履歴、390px幅での表示と、合成音声による実際のAudioWorklet収音を確認しました。AI応答をテスト用に差し替え、一時停止時の残り音声、失敗した音声の同一データでの再試行、再開、終了時の処理、秘密情報を保存しないことを検証しています。
 
 ## 参照した要件・仕様
 
 - [共有議事録](https://docs.google.com/document/d/1EW7VreBfBySWUG6U3IvVlWdSWzOB37uIsQCtA_lmCHk/edit)：セクションごとの平易な要約、話題の可視化、詳細説明、収音を区切る手間の解消。
 - [元のモック](https://youyakuzemi.love-linux-7701.workers.dev/)：ロゴ、ブランド色、7項目の構成。
 - [Gemini 音声の理解](https://ai.google.dev/gemini-api/docs/audio)、[構造化出力](https://ai.google.dev/gemini-api/docs/structured-output)、[モデル一覧](https://ai.google.dev/gemini-api/docs/models)。
+- [OpenAIのモデル一覧](https://developers.openai.com/api/reference/resources/models/methods/list)、[文字起こし](https://developers.openai.com/api/docs/guides/speech-to-text)、[テキスト生成](https://developers.openai.com/api/docs/guides/text)。
+- [Claudeのモデル一覧](https://platform.claude.com/docs/en/api/models/list)、[Messages API](https://platform.claude.com/docs/en/api/messages)。
 - [MDN getDisplayMedia](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia)。
 
 ---
