@@ -3,12 +3,9 @@ import { apiKey, errorResponse, jsonResponse, readJson, requestError } from "../
 
 export async function POST(request: Request) {
   const rejected = requestError(request); if (rejected) return rejected;
-  let key: string, speechKey: string, body;
-  try {
-    key = apiKey(request);
-    body = validateInput(await readJson(request));
-    speechKey = body.speechProvider === "direct" || body.speechProvider === body.provider ? key : apiKey(request, "x-speech-api-key");
-  } catch (error) { return errorResponse(error, 400); }
-  try { return jsonResponse(await analyzeAudio(body, key, fetch, speechKey)); }
+  let key: string, body;
+  try { key = apiKey(request); body = validateInput(await readJson(request)); }
+  catch (error) { return errorResponse(error, 400); }
+  try { return jsonResponse(await analyzeAudio(body, key)); }
   catch (error) { return errorResponse(error); }
 }
