@@ -4,8 +4,8 @@ import { Check, Loader2, RotateCcw, ShieldCheck } from "lucide-react";
 import { PROVIDER_LABELS, connectionReady, type AIConfig, type Provider, type SpeechProvider } from "../lib/ai-config";
 
 type Model = { id: string; name: string };
-const KEY_LINKS = { gemini: "https://aistudio.google.com/apikey", openai: "https://platform.openai.com/api-keys", anthropic: "https://platform.claude.com/settings/keys" };
-const KEY_LABELS = { gemini: "Gemini APIキー", openai: "OpenAI APIキー", anthropic: "Claude APIキー" };
+const KEY_LINKS = { gemini: "https://aistudio.google.com/apikey", openai: "https://platform.openai.com/api-keys" };
+const KEY_LABELS = { gemini: "Gemini APIキー", openai: "OpenAI APIキー" };
 function ModelPicker({ id, label, value, models, loading, disabled, canLoad, onLoad, onChange }: {
   id: string; label: string; value: string; models: Model[]; loading: boolean; disabled: boolean; canLoad: boolean;
   onLoad: () => void; onChange: (value: string) => void;
@@ -21,12 +21,12 @@ function ModelPicker({ id, label, value, models, loading, disabled, canLoad, onL
 }
 export default function AISettings({ initial, locked, onSave, onCancel }: { initial: AIConfig; locked: boolean; onSave: (config: AIConfig) => void; onCancel: () => void }) {
   const [draft, setDraft] = useState<AIConfig>(() => structuredClone(initial));
-  const [models, setModels] = useState<Record<Provider, Model[]>>({ gemini: [], openai: [], anthropic: [] });
+  const [models, setModels] = useState<Record<Provider, Model[]>>({ gemini: [], openai: [] });
   const [loading, setLoading] = useState<Provider | null>(null), [error, setError] = useState("");
   const request = useRef<AbortController | null>(null);
   useEffect(() => () => request.current?.abort(), []);
   const provider = draft.provider;
-  function setProvider(value: Provider) { request.current?.abort(); setLoading(null); setError(""); setDraft(c => ({ ...c, provider: value, speechProvider: value === "gemini" ? "direct" : value === "openai" ? "openai" : "gemini" })); }
+  function setProvider(value: Provider) { request.current?.abort(); setLoading(null); setError(""); setDraft(c => ({ ...c, provider: value, speechProvider: value === "gemini" ? "direct" : "openai" })); }
   function setKey(p: Provider, value: string) { request.current?.abort(); setLoading(null); setError(""); setModels(old => ({ ...old, [p]: [] })); setDraft(c => ({ ...c, keys: { ...c.keys, [p]: value } })); }
   async function loadModels(p: Provider) {
     request.current?.abort(); const controller = new AbortController(); request.current = controller; setLoading(p); setError("");
@@ -50,7 +50,6 @@ export default function AISettings({ initial, locked, onSave, onCancel }: { init
     <p className="field-hint">一覧にはAPIが返す全モデルを表示します。画像生成・音声出力・埋め込み専用など、要約に対応しないモデルは使用できません。利用可否はAPIキーの権限にも依存します。</p>
     {provider === "openai" && <><label className="field-label" htmlFor="openai-api">OpenAI API形式</label><select id="openai-api" className="form-input" disabled={locked} value={draft.openaiApi} onChange={e => setDraft(c => ({ ...c, openaiApi: e.target.value as AIConfig["openaiApi"] }))}><option value="responses">Responses API</option><option value="chat">Chat Completions API</option></select></>}
     <div className="speech-settings"><h3>音声の文字起こし</h3>
-      {provider === "anthropic" && <p className="field-hint">Claudeで要約するには、GeminiまたはOpenAIで先に音声を文字にします。文字起こし用のAPIキーも入力してください。</p>}
       <label className="field-label" htmlFor="speech-provider">音声の処理方法</label><select id="speech-provider" className="form-input" disabled={locked} value={draft.speechProvider} onChange={e => setDraft(c => ({ ...c, speechProvider: e.target.value as SpeechProvider }))}>
         {provider === "gemini" && <option value="direct">選択したGeminiモデルで音声を直接要約</option>}<option value="gemini">Geminiで文字起こし</option><option value="openai">OpenAIで文字起こし</option>
       </select>
@@ -60,7 +59,7 @@ export default function AISettings({ initial, locked, onSave, onCancel }: { init
     </div>
     {error && <p className="settings-error" role="alert">{error}</p>}
     {locked && <p className="field-hint">収音・要約が終わるか、エラーで一時停止した後に設定を変更できます。</p>}
-    <div className="privacy-box"><ShieldCheck size={20} /><div><strong>APIキーは、ページを開いている間だけ保持。</strong><p>音声と文字起こしは選択したサービスへ送信します。キーをブラウザに永続保存しません。ChatGPT・Claudeのチャット契約とは別に、各社APIの利用条件・料金が適用されます。</p></div></div>
+    <div className="privacy-box"><ShieldCheck size={20} /><div><strong>APIキーは、ページを開いている間だけ保持。</strong><p>音声と文字起こしは選択したサービスへ送信します。キーをブラウザに永続保存しません。ChatGPTのチャット契約とは別に、各社APIの利用条件・料金が適用されます。</p></div></div>
     <div className="modal-actions"><button type="button" className="button" onClick={onCancel}>閉じる</button><button className="button primary" type="submit" disabled={locked}><Check size={16} />設定を保存</button></div>
   </form>;
 }

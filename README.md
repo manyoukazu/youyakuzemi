@@ -16,7 +16,7 @@ npm.cmd run dev
 ## 使い方
 
 1. 「デモを体験」で、APIキーなしで要約カードの更新を確認できます。デモは固定サンプルであり、マイクやAIを使用しません。
-2. 「AIの接続設定」でGemini・OpenAI（ChatGPT）・Anthropic（Claude）を選び、各社のAPIキーを入力します。「一覧を取得」でAPIが返す全モデルをページ末尾まで取得し、選択できます。モデルIDの直接入力も可能です。画像生成など、要約に対応しないモデルは利用できません。APIの利用権限・料金が適用されます。
+2. 「AIの接続設定」でGemini・OpenAI（ChatGPT）を選び、各社のAPIキーを入力します。「一覧を取得」でAPIが返す全モデルをページ末尾まで取得し、選択できます。モデルIDの直接入力も可能です。画像生成など、要約に対応しないモデルは利用できません。APIの利用権限・料金が適用されます。
 3. 会場では「マイク」、オンラインでは「タブの音声」を選択します。タブの共有時は「タブの音声も共有」をオンにしてください。
 4. 「収音を開始」を押すと、15／20／30秒分の音声がたまるたびに、文字起こしと要約が更新されます。更新には音声の収集時間に加えてAPI処理時間がかかります。
 5. 背景・目的・関連研究・手法・実験・結論に自動分類し、ここまでの全体要約を更新します。カードから詳細説明と元の言語の表現を確認できます。まだ話されていない項目は埋めません。
@@ -27,9 +27,8 @@ npm.cmd run dev
 
 - Gemini：選んだモデルで音声を直接要約できます。音声を受け取れないモデルでは、文字起こしを別のGemini／OpenAIモデルに任せる設定も可能です。
 - OpenAI（ChatGPT）：OpenAIの文字起こしモデルで音声を文字にし、選択したモデルで要約します。同じOpenAI APIキーを再利用できます。モデルに合わせてResponses API／Chat Completions APIを選べます。
-- Anthropic（Claude）：GeminiまたはOpenAIで文字起こしし、Claudeには文字起こしを渡して要約します。ClaudeのAPIキーに加え、文字起こし用のAPIキーが必要です。
 - モデル一覧は固定の2モデルに制限せず、各サービスのModels APIが返す全件を表示します。取得に失敗した場合は一部だけを完全な一覧として表示しません。取得後でも任意のモデルIDを入力できます。
-- 一覧に載ることと、音声の理解・文章の要約に使えることは別です。音声出力・画像生成・埋め込み・Realtime専用など、対象APIに対応しないモデルは使用できません。ChatGPT／Claudeのチャット契約とAPIの利用権限は別です。
+- 一覧に載ることと、音声の理解・文章の要約に使えることは別です。音声出力・画像生成・埋め込み・Realtime専用など、対象APIに対応しないモデルは使用できません。ChatGPTのチャット契約とAPIの利用権限は別です。
 - APIキーは設定画面の「設定を保存」でページのメモリ内に保持します。更新・再読込すると消えます。設定画面の×ボタンは廃止し、「閉じる」またはEscで戻ります。
 
 ## データと制約
@@ -71,7 +70,6 @@ APIテストは各社への送信内容、モデル一覧のページ送り、�
 - [元のモック](https://youyakuzemi.love-linux-7701.workers.dev/)：ロゴ、ブランド色、7項目の構成。
 - [Gemini 音声の理解](https://ai.google.dev/gemini-api/docs/audio)、[構造化出力](https://ai.google.dev/gemini-api/docs/structured-output)、[モデル一覧](https://ai.google.dev/gemini-api/docs/models)。
 - [OpenAIのモデル一覧](https://developers.openai.com/api/reference/resources/models/methods/list)、[文字起こし](https://developers.openai.com/api/docs/guides/speech-to-text)、[テキスト生成](https://developers.openai.com/api/docs/guides/text)。
-- [Claudeのモデル一覧](https://platform.claude.com/docs/en/api/models/list)、[Messages API](https://platform.claude.com/docs/en/api/messages)。
 - [MDN getDisplayMedia](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia)。
 
 ---

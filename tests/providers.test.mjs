@@ -25,17 +25,10 @@ test("Gemini model enumeration follows every page and keeps specialized models",
   assert.equal(models.length, 3); assert.ok(calls[1].url.includes("pageToken=page-two"));
   assert.ok(models.some(m => m.id === "embedding-model"));
 });
-test("Claude model enumeration follows cursors and OpenAI returns full ID list", async () => {
-  let calls = 0;
-  const claude = await listModels("anthropic", "claude-secret", async (url, options) => {
-    calls++; assert.equal(options.headers.Authorization, "Bearer claude-secret");
-    assert.equal(options.headers["anthropic-version"], "2026-10-21");
-    if (calls === 2) assert.ok(url.includes("after_id=claude-a"));
-    return Response.json({ data: [{ id: calls === 1 ? "claude-a" : "claude-b" }], has_more: calls === 1, last_id: "claude-a" });
-  });
-  assert.equal(claude.length, 2);
+test("OpenAI returns its complete model list and removed providers cannot be requested", async () => {
   const openai = await listModels("openai", "openai-secret", async (_, options) => { assert.equal(options.headers.Authorization, "Bearer openai-secret"); return Response.json({ data: [{ id: "gpt-custom" }, { id: "tts-specialized" }] }); });
   assert.equal(openai.length, 2);
+  await assert.rejects(listModels("anthropic", "test", async () => { assert.fail("Removed provider must not trigger a network request"); }), /AIサービス/);
 });
 test("pagination failure never presents a partial list as complete", async () => {
   let calls = 0;
@@ -54,12 +47,12 @@ test("OpenAI transcribes WAV then sends only text to the selected Responses mode
   });
   assert.equal(calls.length, 2); assert.equal(result.transcript, "Exact original transcript.");
 });
-test("Claude uses a separate transcription key, never receives audio or either secret in its prompt", async () => {
-  const result = await analyzeAudio({ audio, provider: "anthropic", model: "claude-custom", language: "auto", speechProvider: "gemini", speechModel: "gemini-custom" }, "claude-secret", async (url, options) => {
-    if (url.includes("googleapis")) { assert.equal(options.headers["x-goog-api-key"], "speech-secret"); assert.ok(!options.body.includes("claude-secret")); return gemini("Original words."); }
-    assert.equal(url, "https://api.anthropic.com/v1/messages"); assert.equal(options.headers.Authorization, "Bearer claude-secret");
-    const body = JSON.parse(options.body); assert.equal(body.model, "claude-custom"); assert.ok(!options.body.includes(audio)); assert.ok(!options.body.includes("speech-secret")); assert.ok(!options.body.includes("claude-secret")); assert.ok(options.body.includes("Original words."));
-    return Response.json({ content: [{ type: "text", text: JSON.stringify(output) }], stop_reason: "end_turn" });
+test("OpenAI can use a separate Gemini transcription key without disclosing secrets in prompts", async () => {
+  const result = await analyzeAudio({ audio, provider: "openai", model: "gpt-custom", language: "auto", speechProvider: "gemini", speechModel: "gemini-custom" }, "summary-secret", async (url, options) => {
+    if (url.includes("googleapis")) { assert.equal(options.headers["x-goog-api-key"], "speech-secret"); assert.ok(!options.body.includes("summary-secret")); return gemini("Original words."); }
+    assert.equal(url, "https://api.openai.com/v1/responses"); assert.equal(options.headers.Authorization, "Bearer summary-secret");
+    const body = JSON.parse(options.body); assert.equal(body.model, "gpt-custom"); assert.ok(!options.body.includes(audio)); assert.ok(!options.body.includes("speech-secret")); assert.ok(!options.body.includes("summary-secret")); assert.ok(options.body.includes("Original words."));
+    return Response.json({ output: [{type:"message",content:[{type:"output_text",text:JSON.stringify(output)}]}] });
   }, "speech-secret");
   assert.equal(result.transcript, "Original words.");
 });
@@ -78,14 +71,14 @@ test("Gemini text-only summary model can use OpenAI transcription and Chat Compl
 });
 test("silence skips summary API and transcription failure does not send audio to summarizer", async () => {
   let calls = 0;
-  const input = { audio, provider: "anthropic", model: "claude-custom", language: "auto", speechProvider: "openai", speechModel: "gpt-transcribe" };
+  const input = { audio, provider: "gemini", model: "gemini-custom", language: "auto", speechProvider: "openai", speechModel: "gpt-transcribe" };
   const result = await analyzeAudio(input, "key", async () => { calls++; return Response.json({ text: "" }); });
   assert.equal(result.transcript, ""); assert.equal(calls, 1);
   await assert.rejects(analyzeAudio(input, "key", async () => new Response("", {status: 401})), /APIキー/);
 });
 test("client settings serialize no API keys in payloads and require all selected credentials", () => {
   const c = defaultAIConfig(); c.keys.gemini = "secret-gemini";
-  assert.equal(connectionReady(c), true); c.provider = "anthropic"; c.keys.anthropic = "secret-claude"; c.speechProvider = "gemini";
+  assert.equal(connectionReady(c), true); c.provider = "openai"; c.keys.openai = "secret-openai"; c.speechProvider = "gemini";
   assert.equal(connectionReady(c), true); assert.equal(requestHeaders(c)["x-speech-api-key"], "secret-gemini");
   assert.ok(!JSON.stringify(requestSettings(c)).includes("secret"));
   c.keys.gemini = ""; assert.equal(connectionReady(c), false);
@@ -95,4 +88,5 @@ test("model discovery route rejects untrusted origin, missing keys and bad provi
   assert.equal((await modelsPOST(request({}, {provider:"gemini"}))).status,401);
   assert.equal((await modelsPOST(request({"x-api-key":"test",origin:"https://other.test"},{provider:"gemini"}))).status,403);
   assert.equal((await modelsPOST(request({"x-api-key":"test"},{provider:"unknown"}))).status,400);
+  assert.equal((await modelsPOST(request({"x-api-key":"test"},{provider:"anthropic"}))).status,400);
 });

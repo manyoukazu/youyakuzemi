@@ -1,4 +1,4 @@
-export type Provider = "gemini" | "openai" | "anthropic";
+export type Provider = "gemini" | "openai";
 export type SpeechProvider = "direct" | "gemini" | "openai";
 export type AIConfig = {
   provider: Provider;
@@ -8,10 +8,10 @@ export type AIConfig = {
   speechModels: Record<"gemini" | "openai", string>;
   openaiApi: "responses" | "chat";
 };
-export const PROVIDER_LABELS: Record<Provider, string> = { gemini: "Gemini", openai: "OpenAI（ChatGPT）", anthropic: "Anthropic（Claude）" };
+export const PROVIDER_LABELS: Record<Provider, string> = { gemini: "Gemini", openai: "OpenAI（ChatGPT）" };
 export function defaultAIConfig(): AIConfig { return {
-  provider: "gemini", keys: { gemini: "", openai: "", anthropic: "" },
-  models: { gemini: "gemini-3.8-flash", openai: "gpt-6-luna", anthropic: "claude-haiku-5-5" },
+  provider: "gemini", keys: { gemini: "", openai: "" },
+  models: { gemini: "gemini-3.8-flash", openai: "gpt-6-luna" },
   speechProvider: "direct", speechModels: { gemini: "gemini-3.8-flash", openai: "gpt-transcribe" }, openaiApi: "responses"
 }; }
 export function connectionReady(c: AIConfig): boolean {
